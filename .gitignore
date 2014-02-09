@@ -1,0 +1,17 @@
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.sublime-*
+.tmp
+.sass-cache
+node_modules
+bower_components
+npm-debug.log
+dist
+build

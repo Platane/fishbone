@@ -1,0 +1,22 @@
+{
+  "name": "fishbone",
+  "version": "0.1.0",
+  "author": "Platane <arthur@arthur-brongniart.fr>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "dependencies": {
+
+  },
+  
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "bower": "*"
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  }
+
+}

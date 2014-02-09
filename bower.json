@@ -1,0 +1,19 @@
+{
+  "name": "fishbone",
+  "version": "0.1.0",
+  "dependencies": {
+    "zepto":  "*",
+    "underscore": "*",
+    "jasmine": "2.x",
+    "requirejs" : "*"
+  },
+  "devDependencies": {},
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
