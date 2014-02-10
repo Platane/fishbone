@@ -20,13 +20,13 @@ require.config({
 require([ 
   'jasmine-boot' ,
 
-  /*
-  'specs/ObservableSpec',
   
-  */
+  'specs/ObservableSpec',
   'specs/ModelPrimitiveAttrSpec',
   'specs/ModelReferenceAttrSpec',
   
+  
+  'specs/CollectionSpec',
 
 
   ],function( jasmineBoot ){

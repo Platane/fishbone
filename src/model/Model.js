@@ -1,10 +1,11 @@
 define( [
-	"model/Observable",
-	"model/Stub",
-	"utils",
-	"underscore",
+    "model/Observable",
+    "model/Stub",
+    "utils",
+    "underscore",
 
-	] , function( Observable , Stub , utils ){
+    ] , function( Observable , Stub , utils ){
+
 
 
 
@@ -13,53 +14,65 @@ for( var i in Observable.prototype )
 _.extend( Model.prototype , Observable.prototype )
 _.extend( Model.prototype , {
 
-	attributes : {},
+    attributes : {},
 
-	references : {},
+    references : {},
 
-	init : function( attr , options ){
-		
-		//copy prototypes field into own field
-		var refs = {};
-		for( var i in this.references ){
-			refs[i] = new Stub();
-			refs[i].on( "all" , this , this._relayEvent , i );
-		}
-		this.references = refs;
+    init : function( attr , options ){
+        
+        //copy prototypes field into own field
+        var refs = {};
+        for( var i in this.references ){
+            refs[i] = new Stub();
+            refs[i].on( "all" , this , this._relayEvent , i );
+        }
+        this.references = refs;
 
-		this.attributes = {};
+        this.attributes = {};
 
-		this.set(attr || {} ,options);
-	},
 
-	set : function( attr , options ){
-		
-		var silent = options && options.silent
+        this.id = attr && attr.id ? attr.id :  Model.nextId()
 
-		var change = false;
-		for( var i in attr ){
+        this.set(attr || {} ,options);
+    },
 
-			if( this.references[i] ){
-				this.references[i].setActual( attr[i] , options )
-			}
-			else 
-			if( this.attributes[i] !== attr[i] ){
-				this.attributes[i] = attr[i];
-				if( !silent )
-					this.trigger( "change:"+i )
-				change = true
-			}
-		}
-		if( change && !silent )
-			this.trigger( "change" )
-	},
+    set : function( attr , options ){
+        
+        var silent = options && options.silent
 
-	_relayEvent : function( eventName , attrName , o ){
+        var change = false;
+        for( var i in attr ){
+
+            if( i == 'id' )
+                continue;
+
+            if( this.references[i] ){
+                this.references[i].setActual( attr[i] , options )
+            }
+            else 
+            if( this.attributes[i] !== attr[i] ){
+                this.attributes[i] = attr[i];
+                if( !silent )
+                    this.trigger( "change:"+i )
+                change = true
+            }
+        }
+        if( change && !silent )
+            this.trigger( "change" )
+    },
+
+    _relayEvent : function( eventName , attrName , o ){
         var s = eventName.split(':')
         this.trigger( s[0]+':'+attrName + ( s.length>1 ? '.'+s[1] : '' ) , o )
     },
 })
 
+
+var idC = 1;
+
+Model.nextId = function(){
+    return idC ++;
+}
 
 Model.extend = function( proto ){ return utils.extend( Model ,proto) };
 
