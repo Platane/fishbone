@@ -1,38 +1,9 @@
 define( [
-    "model/Observable"
-    ] , function( Observable ){
+    "model/Observable",
+    "testUtils/Callback"
+    ] , function( Observable , Callback ){
 
     return function(){
-
-        var Callback=function(){ 
-            var called = false;
-            var args = null;
-            var ctx = null;
-
-            this.fn = function(){
-                called = true;
-                args = arguments;
-                ctx = this;
-            }
-
-            this.reset = function(){
-                called = false;
-                args = null;
-                ctx = null;
-            }
-
-            this.called = function(){
-                return called;
-            }
-
-            this.args = function(){
-                return args;
-            }
-
-            this.ctx = function(){
-                return ctx;
-            }
-        }
 
         describe("Observable", function() {
 
