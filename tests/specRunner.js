@@ -1,7 +1,7 @@
 require.config({
   baseUrl: '../src/',
   paths: {
-    specs: '../tests/specs/',
+    specs: '../tests/specs',
     requirejs: 'bower_components/requirejs/require',
     underscore: 'bower_components/underscore/underscore',
     zepto: 'bower_components/zepto/zepto',
@@ -19,7 +19,8 @@ require.config({
 require([ 
   'jasmine-boot' ,
 
-  'specs/ModelSpec',
+  'specs/ObservableSpec',
+
 
   ],function( jasmineBoot ){
 
