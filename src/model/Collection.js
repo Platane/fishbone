@@ -137,7 +137,7 @@ _.extend( Collection.prototype , {
             this.trigger( 'add'  , toAdd )
         }
 
-        if( ( toRmv.length > 0 || toAdd.length > 0 ) && !nosort )
+        if( ( toRmv.length > 0 || toAdd.length > 0 ) && !nosort && !silent)
             this.trigger( 'sort' )
     },
 

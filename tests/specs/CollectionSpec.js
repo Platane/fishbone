@@ -145,6 +145,20 @@ define( [
                     expect( this.callbackU.calls()[0][0] ).toBe( "added" )
                 });
             });
+
+			describe(" set options{add:true} {silent : true } ",function(){
+
+                beforeEach(function(){
+                    this.callback.reset();
+                    this.book.set( this.users.slice(0,3) , { add:true , merge : true , silent : true} )
+                    this.book.set( this.users.slice(0,6) , { add:true , merge : true  , silent : true} )
+                    this.book.set( this.users.slice(5) , { add:true , merge : true  , silent : true} )
+                });
+
+                it("should have not triggered any event", function() {
+                    expect( this.callback.called() ).toBe( false )
+                });
+            });
             
         });
 
