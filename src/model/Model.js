@@ -1,7 +1,7 @@
 define( [
     "model/Observable",
     "model/Stub",
-    "utils",
+    "fishboneUtils",
     "underscore",
 
     ] , function( Observable , Stub , utils ){
@@ -18,6 +18,8 @@ _.extend( Model.prototype , {
 
     references : {},
 
+    collections : {},
+
     init : function( attr , options ){
         
         //copy prototypes field into own field
@@ -27,6 +29,13 @@ _.extend( Model.prototype , {
             refs[i].on( "all" , this , this._relayEvent , i );
         }
         this.references = refs;
+
+        var cols = {};
+        for( var i in this.collections ){
+            cols[i] = new this.collections[i]();
+            //cols[i].on( "all" , this , this._relayEvent , i );
+        }
+        this.collections = cols;
 
         this.attributes = {};
 
@@ -50,6 +59,10 @@ _.extend( Model.prototype , {
                 this.references[i].setActual( attr[i] , options )
             }
             else 
+            if( this.collections[i] ){
+                this.collections[i].set( attr[i] , options )
+            }
+            else
             if( this.attributes[i] !== attr[i] ){
                 this.attributes[i] = attr[i];
                 if( !silent )

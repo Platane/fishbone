@@ -1,7 +1,7 @@
 define( [
     "model/Observable",
     "model/Model",
-    "utils",
+    "fishboneUtils",
     "underscore",
 
     ] , function( Observable , Model , utils ){
@@ -19,7 +19,7 @@ _.extend( Collection.prototype , {
 
     modelsById : null ,
 
-    // comparator ( a , b ) < 0  -> a < b -> a before b in models
+    // order by crescent order, or decsrescant order with a '-''
     comparator : null,
 
     init : function( attr , options ){
@@ -30,6 +30,14 @@ _.extend( Collection.prototype , {
         this.models = [];
 
         this.modelsById = {};
+
+        if( this.comparator ){
+            var compAsc = this.comparator[0] == '-'
+            var compAttr = compAsc ? this.comparator.substr(1) : this.comparator;
+            // comparator ( a , b ) < 0  -> a < b -> a before b in models
+            this._comparatorFn = function(a,b){ return ((a.attributes[compAttr] < b.attributes[compAttr]) == compAsc) ? 1 : -1 }
+            this._compAttr = compAttr;
+        }
 
         this.id = Model.nextId()
 
@@ -44,8 +52,8 @@ _.extend( Collection.prototype , {
         options = options || {}
 
         var silent = options.silent,
-            merge = options.merge,
-            add = options.add,
+            merge = options.merge == null ? true : options.merge,
+            add = options.add == null ? true : options.add,
             del = options.del,
             nosort = options.nosort
 
@@ -72,14 +80,18 @@ _.extend( Collection.prototype , {
                     this.newModelsById[id]=true;
             }else{
                 if( add )
-                    toAdd.push( attrs[i] instanceof this.Model ? attrs[i] : new this.Models( attrs[i].attributes , options ) ) 
+                    toAdd.push( attrs[i] instanceof this.Model ? attrs[i] : new this.Model( attrs[i] , options ) ) 
             }
         }
 
         if( del ){
             for(var i=this.models.length;i--;)
                 if( !this.newModelsById[ this.models[i].id ] ){
+
+                    //push to delete array
                     toRmv.push( this.models[i] )
+
+                    //remove
                     delete this.modelsById[ this.models[i].id ]
                     this.models.splice(i,1);
                 }
@@ -87,7 +99,7 @@ _.extend( Collection.prototype , {
 
         if( add ){
 
-            if( this.comparator && !nosort ){
+            if( this._comparatorFn && !nosort ){
 
                 for( var i=toAdd.length;i--;){
 
@@ -97,20 +109,20 @@ _.extend( Collection.prototype , {
                     var a=0,b=this.models.length-1,e;
 
                     // it is the greatest ?
-                    if( b<0 || this.comparator( this.models[b] , toAdd[i] ) < 0 ){
+                    if( b<0 || this._comparatorFn( this.models[b] , toAdd[i] ) < 0 ){
                         this.models.push( toAdd[i] )
                         continue
                     }
 
                     while(b-a>1){
                         e = Math.floor( (a+b)/2 )
-                        if( this.comparator( this.models[e] , toAdd[i] ) < 0 )
+                        if( this._comparatorFn( this.models[e] , toAdd[i] ) < 0 )
                             a = e;
                         else
                             b = e;
                     }
                     
-                    if( this.comparator( this.models[a] , toAdd[i] ) < 0 )
+                    if( this._comparatorFn( this.models[a] , toAdd[i] ) < 0 )
                         this.models.splice( b , 0 , toAdd[i] )
                     else
                         this.models.splice( a , 0 , toAdd[i] )
@@ -126,14 +138,28 @@ _.extend( Collection.prototype , {
         }
 
         if( toRmv.length > 0 && !silent ){
-            for( var i=toRmv.length;i--;)
+            for( var i=toRmv.length;i--;){
+                //remove sort attr listener
+                toRmv[i].off( this )
+
+                // notify the removing
                 toRmv[i].trigger( 'removed' , this );
+            }
+                
             this.trigger( 'remove'  , toRmv )
         }
 
         if( toAdd.length > 0 && !silent ){
-            for( var i=toAdd.length;i--;)
+            for( var i=toAdd.length;i--;){
+
+                // if the collection is sortable, listen for change on the sorted attr
+                if( this._compAttr )
+                    // TODO, this is little overkill, replace the misplaced element should be cheapier
+                    toAdd[i].on('change:'+this._compAttr , this , this.sort)
+
+                //notify the add
                 toAdd[i].trigger( 'added' , this );
+            }
             this.trigger( 'add'  , toAdd )
         }
 
@@ -143,6 +169,14 @@ _.extend( Collection.prototype , {
 
     get : function(id){
         return this.modelsById[id]
+    },
+
+    sort : function(options){
+
+        this.models = this.models.sort( this._comparatorFn )
+
+        if( !options || !options.silent)
+            this.trigger( 'sort' )
     },
 
     _relayEvent : function( eventName , attrName , o ){

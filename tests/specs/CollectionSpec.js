@@ -145,21 +145,81 @@ define( [
                     expect( this.callbackU.calls()[0][0] ).toBe( "added" )
                 });
             });
-
-			describe(" set options{add:true} {silent : true } ",function(){
+        
+            describe(" set options{add:true,nosort:true} ",function(){
 
                 beforeEach(function(){
                     this.callback.reset();
-                    this.book.set( this.users.slice(0,3) , { add:true , merge : true , silent : true} )
-                    this.book.set( this.users.slice(0,6) , { add:true , merge : true  , silent : true} )
-                    this.book.set( this.users.slice(5) , { add:true , merge : true  , silent : true} )
+                    this.book.set( this.users , { add:true , del : true , merge : true , nosort: true} )
                 });
 
-                it("should have not triggered any event", function() {
-                    expect( this.callback.called() ).toBe( false )
+                it("item should be registered and retreivable with get( <id> )", function() {
+                    for(var i = this.users.length ; i -- ; ){
+                        expect( !!this.book.get( this.users[i].id ) ).toBe( true )
+                        expect( this.book.get( this.users[i].id ).attributes.name ).toBe( this.users[i].attributes.name )
+                    }
                 });
-            });
-            
+
+                it("should not have triggered sort event on collection", function() {
+                    for(var i=this.callback.calls().length;i--;)
+                        if( this.callback.calls()[i][0] == 'sort' )
+                            break;
+                    expect( i>=0 ).toBe( false )
+                });
+            }); 
+
+            describe(" sort ",function(){
+
+                beforeEach(function(){
+                    this.book.set( this.users , { add:true , del : true , merge : true , nosort: true} )
+                    this.callback.reset();
+                    this.book.sort();
+                });
+
+                it("should have triggered sort event on collection", function() {
+                    for(var i=this.callback.calls().length;i--;)
+                        if( this.callback.calls()[i][0] == 'sort' )
+                            break;
+                    expect( i>=0 ).toBe( true )
+                });
+
+                it("should have not triggered any other event", function() {
+                    expect( this.callback.calls().length ).toBe( 1 )
+                });
+
+                it("item should be registered in models ordered", function() {
+                    for(var i = this.book.models.length-1 ; i -- ; )
+                        expect( this.book.models[i].attributes.age ).toBeLessThan( this.book.models[i+1].attributes.age )
+                });
+            }); 
+
+            describe(" set the sortable attr of an item ",function(){
+
+                beforeEach(function(){
+
+                    this.book.set( this.users , { add:true , del : true , merge : true } )
+
+                    this.callback.reset();
+                    this.users[ 5 ].attributes.age = -99;
+                    this.users[ 5 ].trigger('change:age').trigger('change')
+                });
+
+                it("should have triggered sort event on collection", function() {
+                    for(var i=this.callback.calls().length;i--;)
+                        if( this.callback.calls()[i][0] == 'sort' )
+                            break;
+                    expect( i>=0 ).toBe( true )
+                });
+
+                it("should have not triggered any other event", function() {
+                    expect( this.callback.calls().length ).toBe( 1 )
+                });
+
+                it("item should be registered in models ordered", function() {
+                    for(var i = this.book.models.length-1 ; i -- ; )
+                        expect( this.book.models[i].attributes.age ).toBeLessThan( this.book.models[i+1].attributes.age )
+                });
+            }); 
         });
 
     }

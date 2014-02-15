@@ -9,6 +9,7 @@ require.config({
     'jasmine' : 'bower_components/jasmine/lib/jasmine-core/jasmine',
     'jasmine-html' : 'bower_components/jasmine/lib/jasmine-core/jasmine-html',
     'jasmine-boot' : '../tests/boot',
+    'fishboneUtils' : 'utils',
   },
   shim: {
     'jasmine-html': {
